@@ -31,31 +31,6 @@ detect_os() {
   fi
 }
 
-install_dependencies() {
-  log "正在安装依赖程序..."
-  case "$OS" in
-    ubuntu|debian|raspbian)
-      if ! apt update || ! apt install -y openvpn curl iptables net-tools; then
-        error "安装失败：apt 安装失败"
-      fi
-      ;;
-    centos|rocky|almalinux|amzn)
-      yum install -y epel-release || true
-      if ! yum install -y openvpn curl iptables net-tools; then
-        error "安装失败：yum 安装失败"
-      fi
-      ;;
-    arch)
-      if ! pacman -Sy --noconfirm openvpn curl iptables net-tools; then
-        error "安装失败：pacman 安装失败"
-      fi
-      ;;
-    *)
-      error "不支持的系统：$OS"
-      ;;
-  esac
-}
-
 download_installer() {
   log "下载 OpenVPN 安装脚本..."
   curl -O https://raw.githubusercontent.com/angristan/openvpn-install/master/openvpn-install.sh || error "下载失败"
@@ -70,7 +45,6 @@ run_installer() {
 main() {
   check_root
   detect_os
-  install_dependencies
   download_installer
   run_installer
   log "安装流程已结束，如有错误，请查看日志文件：$LOG_FILE"
